@@ -1,0 +1,26 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sea-palace-site
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: sea-palace-site/.nvmrc
+          cache: npm
+          cache-dependency-path: sea-palace-site/package-lock.json
+      - run: npm ci
+      - run: npm run build
