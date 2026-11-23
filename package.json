@@ -1,0 +1,7 @@
+{
+  "name": "sea-palace-workspace",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix ./sea-palace-site run dev --"
+  }
+}
