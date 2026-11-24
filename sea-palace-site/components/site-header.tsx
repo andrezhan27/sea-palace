@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, type MouseEvent } from "react";
-import { isLanguage, type Language, type RestaurantCopy } from "../lib/restaurant";
+import { isLanguage, restaurant, type Language, type RestaurantCopy } from "../lib/restaurant";
 import { BookLink, Brand, Icon } from "./site-ui";
 
 export const navigation = [
@@ -23,6 +24,7 @@ type HeaderProps = {
   activeSection: SectionId;
   scrolled: boolean;
   showReviews: boolean;
+  menuPage?: boolean;
 };
 
 function LanguageSelect({ copy, language, onLanguageChange }: Pick<HeaderProps, "copy" | "language" | "onLanguageChange">) {
@@ -40,7 +42,7 @@ function LanguageSelect({ copy, language, onLanguageChange }: Pick<HeaderProps, 
 }
 
 export function SiteHeader({
-  copy, language, onLanguageChange, menuOpen, onMenuChange, activeSection, scrolled, showReviews,
+  copy, language, onLanguageChange, menuOpen, onMenuChange, activeSection, scrolled, showReviews, menuPage = false,
 }: HeaderProps) {
   const header = useRef<HTMLElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
@@ -49,6 +51,16 @@ export function SiteHeader({
   const restoreFocus = useRef(false);
   const links = navigation.filter(({ id }) => showReviews || id !== "avaliacoes");
 
+  function href(id: SectionId) {
+    if (id === "carta") return restaurant.links.menu;
+    return menuPage ? `/#${id}` : `#${id}`;
+  }
+
+  function current(id: SectionId) {
+    if (activeSection !== id) return undefined;
+    return menuPage ? "page" : "location";
+  }
+
   function close(focusToggle = true) {
     restoreFocus.current = focusToggle;
     onMenuChange(false);
@@ -56,7 +68,7 @@ export function SiteHeader({
 
   useEffect(() => {
     if (menuOpen) {
-      const mobile = matchMedia("(max-width: 800px)");
+      const mobile = matchMedia("(max-width: 860px)");
       const previousFocus = document.activeElement;
       panel.current?.querySelector("a")?.focus();
 
@@ -113,7 +125,7 @@ export function SiteHeader({
     if (!menuOpen || !(event.target instanceof Element)) return;
     const link = event.target.closest("a");
     if (!link) return;
-    if (link.hash && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+    if (link.hash && link.pathname === location.pathname && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
       event.preventDefault();
       pendingAnchor.current = link.hash;
       close(false);
@@ -123,12 +135,12 @@ export function SiteHeader({
   }
 
   return (
-    <header ref={header} className={`header${scrolled ? " is-scrolled" : ""}${menuOpen ? " is-open" : ""}`} inert={!scrolled && !menuOpen} onClick={onAnchor}>
+    <header ref={header} className={`header${scrolled ? " is-scrolled" : ""}${menuOpen ? " is-open" : ""}`} onClick={onAnchor}>
       <div className="shell header-inner grid h-full items-center">
-        <Brand />
+        <Brand href={href("inicio")} />
         <nav className="desktop-nav" aria-label={copy.mainNav}>
           {links.map(({ id, text }) => (
-            <a key={id} href={`#${id}`} aria-current={activeSection === id ? "location" : undefined}>{copy[text]}</a>
+            <Link key={id} href={href(id)} prefetch={id === "carta" ? false : undefined} aria-current={current(id)}>{copy[text]}</Link>
           ))}
         </nav>
         <div className="header-actions items-center justify-end">
@@ -151,9 +163,9 @@ export function SiteHeader({
       <div ref={panel} className="mobile-menu" id="mobile-menu" inert={!menuOpen}>
         <nav aria-label={copy.mainNav}>
           {links.map(({ id, text, number }) => (
-            <a key={id} href={`#${id}`} aria-current={activeSection === id ? "location" : undefined}>
+            <Link key={id} href={href(id)} prefetch={id === "carta" ? false : undefined} aria-current={current(id)}>
               <span aria-hidden="true">{number}</span><span>{copy[text]}</span>
-            </a>
+            </Link>
           ))}
         </nav>
         <div className="mobile-menu-actions mt-[21px] flex items-center gap-[19px]">

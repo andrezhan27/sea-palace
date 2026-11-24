@@ -1,68 +1,101 @@
 import Link from "next/link";
-import type { CSSProperties } from "react";
-import { menuPhotos } from "../lib/menu-photos";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { spacePhotos } from "../lib/space-photos";
+import type { RestaurantPolicies } from "../lib/restaurant-policies";
 import { restaurant, type Language, type RestaurantCopy } from "../lib/restaurant";
 import { Carousel } from "./carousel";
-import { BookLink, Brand, ExternalLink, Icon, Photo, Seal, SectionTitle } from "./site-ui";
+import { MenuPreview } from "./menu-preview";
+import { BookLink, Brand, ExternalLink, Icon, Photo, SectionTitle } from "./site-ui";
 
-const gallery = [
-  { name: "booths", widths: [640, 960], alt: "boothsAlt", wide: true },
-  { name: "detail", widths: [480, 960], alt: "detailAlt", wide: false },
-  { name: "table", widths: [480, 960], alt: "tableAlt", wide: false },
-  { name: "terrace", widths: [640, 960], alt: "terraceAlt", wide: true },
-] as const;
+function StorefrontPicture({ className, alt, isHero = false }: {
+  className?: string;
+  alt: string;
+  isHero?: boolean;
+}) {
+  const sizes = isHero ? "100vw" : "(max-width: 600px) calc(100vw - 40px), (max-width: 1050px) calc(100vw - 60px), (max-width: 1420px) calc(100vw - 100px), 1320px";
+
+  return (
+    <picture className={className}>
+      <source
+        media="(max-width: 600px)"
+        type="image/avif"
+        srcSet="/assets/hero-mobile-480.avif 480w, /assets/hero-mobile-720.avif 720w, /assets/hero-mobile-941.avif 941w"
+        sizes={sizes}
+      />
+      <source
+        media="(max-width: 600px)"
+        type="image/webp"
+        srcSet="/assets/hero-mobile-480.webp 480w, /assets/hero-mobile-720.webp 720w, /assets/hero-mobile-941.webp 941w"
+        sizes={sizes}
+      />
+      <source
+        type="image/avif"
+        srcSet="/assets/hero-desktop-960.avif 960w, /assets/hero-desktop-1672.avif 1672w"
+        sizes={sizes}
+      />
+      <img
+        src="/assets/hero-desktop-1672.webp"
+        srcSet="/assets/hero-desktop-960.webp 960w, /assets/hero-desktop-1672.webp 1672w"
+        sizes={sizes}
+        width={1672}
+        height={941}
+        alt={alt}
+        loading={isHero ? "eager" : "lazy"}
+        fetchPriority={isHero ? "high" : undefined}
+        decoding={isHero ? undefined : "async"}
+      />
+    </picture>
+  );
+}
 
 export function Hero({ copy }: { copy: RestaurantCopy }) {
   return (
-    <section className="hero relative isolate grid place-items-center text-center" id="inicio" aria-labelledby="hero-title">
-      <picture className="hero-photo">
-        <source media="(max-width: 600px)" srcSet="/assets/storefront-corrected-mobile-640.webp 640w, /assets/storefront-corrected-mobile-780.webp 780w" sizes="100vw" />
-        <img
-          src="/assets/storefront-corrected-1440.webp"
-          srcSet="/assets/storefront-corrected-960.webp 960w, /assets/storefront-corrected-1440.webp 1440w, /assets/storefront-corrected-1774.webp 1774w"
-          sizes="100vw"
-          width={1774}
-          height={887}
-          alt={copy.heroAlt}
-          fetchPriority="high"
-        />
-      </picture>
+    <section className="hero relative isolate grid" id="inicio" aria-labelledby="hero-title">
+      <StorefrontPicture className="hero-photo" alt={copy.heroAlt} isHero />
+      <img className="hero-crest" src="/assets/brand/sea-palace-crest.webp" width={144} height={176} alt="" />
       <div className="hero-content">
-        <p className="eyebrow">{copy.heroKicker}</p>
-        <h1 id="hero-title" tabIndex={-1}>Sea Palace</h1>
-        <div className="hero-actions flex flex-wrap justify-center">
-          <BookLink>{copy.book}</BookLink>
-          <a className="button button-outline" href="#carta">{copy.viewMenu}</a>
-        </div>
+        <p className="hero-location eyebrow">{copy.heroLocation}</p>
+        <h1 id="hero-title" tabIndex={-1}>
+          <img src="/assets/brand/sea-palace-white.webp" width={2172} height={724} alt="Sea Palace" />
+        </h1>
+        <p className="hero-cuisine">{copy.heroCuisine}</p>
       </div>
-      <a className="hero-scroll flex flex-col items-center" href="#espaco">
-        <span>{copy.scroll}</span>
-        <Icon name="down" />
-      </a>
+      <div className="hero-actions flex flex-wrap items-center">
+        <BookLink>{copy.book}</BookLink>
+        <Link className="hero-menu-link" href={restaurant.links.menu} prefetch={false}>{copy.viewMenu}</Link>
+      </div>
     </section>
   );
 }
 
-export function SpaceSection({ copy }: { copy: RestaurantCopy }) {
+const smallSpacePhotos = new Set(["space-2", "space-5", "space-8", "space-10"]);
+const mobileSpacePhotoSize = "(max-width: 600px) calc((100vw - 48px) / 2), (max-width: 760px) calc((100vw - 68px) / 2)";
+
+export function SpaceSection({ copy, language }: { copy: RestaurantCopy; language: Language }) {
   return (
-    <section className="section shell" id="espaco" aria-labelledby="space-title">
-      <div className="section-head grid" data-reveal>
+    <section className="section" id="espaco" aria-labelledby="space-title">
+      <div className="shell section-head grid">
         <SectionTitle id="space-title" number="01">{copy.spaceTitle}</SectionTitle>
         <p>{copy.spaceCopy}</p>
       </div>
-      <div className="space-grid grid grid-cols-2">
-        {gallery.map(({ name, widths, alt, wide }, index) => (
-          <figure className="photo" data-reveal style={{ "--reveal-delay": `${60 * index}ms` } as CSSProperties} key={name}>
-            <Photo
-              name={name}
-              widths={widths}
-              sizes={wide ? "(max-width: 600px) calc(100vw - 40px), 47vw" : "(max-width: 600px) 45vw, 47vw"}
-              width={960}
-              height={650}
-              alt={copy[alt]}
-            />
-          </figure>
-        ))}
+      <div className="shell space-mosaic">
+        {spacePhotos.map((photo) => {
+          const small = smallSpacePhotos.has(photo.name);
+          const desktopSize = small ? "(max-width: 1420px) 13vw, 177px" : "(max-width: 1420px) 27vw, 368px";
+
+          return (
+            <figure className={small ? "photo space-photo" : "photo space-photo space-photo-large"} key={photo.name}>
+              <Photo
+                name={`space/${photo.name}`}
+                widths={[480, 960]}
+                sizes={`${mobileSpacePhotoSize}, ${desktopSize}`}
+                width={960}
+                height={720}
+                alt={photo[language]}
+              />
+            </figure>
+          );
+        })}
       </div>
     </section>
   );
@@ -70,66 +103,60 @@ export function SpaceSection({ copy }: { copy: RestaurantCopy }) {
 
 export function MenuSection({ copy, language }: { copy: RestaurantCopy; language: Language }) {
   return (
-    <section className="section bg-band" id="carta" aria-labelledby="menu-title">
-      <div className="shell section-head grid" data-reveal>
+    <section className="section" id="carta" aria-labelledby="menu-title">
+      <div className="shell section-head grid">
         <SectionTitle id="menu-title" number="02">{copy.menuTitle}</SectionTitle>
         <div>
           <p>{copy.menuCopy}</p>
           <div className="text-links flex flex-wrap">
-            <ExternalLink className="text-link" href={restaurant.links.menu}>
-              <span>{copy.fullMenu}</span><Icon name="external" />
-            </ExternalLink>
+            <Link className="button button-primary" href={restaurant.links.menu} prefetch={false}>{copy.viewMenu}</Link>
+            <ExternalLink className="text-link" href={restaurant.links.menuPdf}>{copy.fullMenu}</ExternalLink>
           </div>
         </div>
       </div>
 
-      <Carousel name="food" label={copy.foodCarousel} copy={copy} speed={21} items={menuPhotos.map(({ name, alt, caption }) => ({
-        key: name,
-        content: (
-          <figure className="food-card photo relative isolate">
-            <Photo
-              name={`menu/${name}`}
-              widths={[480, 800]}
-              sizes="(max-width: 600px) 80vw, (max-width: 900px) 49vw, 34vw"
-              width={800}
-              height={600}
-              alt={alt[language]}
-              draggable={false}
-            />
-            <figcaption>{caption[language]}</figcaption>
-          </figure>
-        ),
-      }))} />
-      <SpecialtiesCard copy={copy} language={language} />
+      <MenuPreview copy={copy} language={language} />
     </section>
   );
 }
 
-function SpecialtiesCard({ copy, language }: { copy: RestaurantCopy; language: Language }) {
-  const price = new Intl.NumberFormat(copy.locale, { style: "currency", currency: "EUR" });
+function VisitMap({ copy }: { copy: RestaurantCopy }) {
+  const map = useRef<HTMLDivElement>(null);
+  const [loadMap, setLoadMap] = useState(false);
+  const { links } = restaurant;
+
+  useEffect(() => {
+    if (!map.current || !("IntersectionObserver" in window)) {
+      setLoadMap(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+      setLoadMap(true);
+    }, { rootMargin: "200px 0px" });
+
+    observer.observe(map.current);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className="signature shell" id="especialidades" data-reveal>
-      <div className="signature-brand grid justify-items-center gap-2.5">
-        <Seal />
-        <h3 className="text-center">{copy.specialties}</h3>
-      </div>
-      <div className="signature-grid grid">
-        {Object.entries(restaurant.dishes).map(([group, dishes]) => (
-          <div key={group}>
-            <h4 className="eyebrow">{group === "dimSum" ? "Dim sum" : copy.duck}</h4>
-            <dl>
-              {dishes.map((dish) => (
-                <div className="flex items-baseline justify-between gap-3.5" key={dish.pt}>
-                  <dt>{dish[language]}</dt>
-                  <dd>{price.format(dish.price)}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        ))}
-      </div>
-      <p className="signature-note text-center">{copy.priceNote}</p>
+    <div ref={map} className="map relative overflow-hidden">
+      {loadMap && (
+        <iframe
+          className="size-full border-0"
+          title={copy.mapTitle}
+          width={1320}
+          height={345}
+          referrerPolicy="strict-origin-when-cross-origin"
+          allowFullScreen
+          src={links.map}
+        />
+      )}
+      <ExternalLink className="button button-map" href={links.directions}>
+        <span>{copy.directions}</span><Icon name="external" />
+      </ExternalLink>
     </div>
   );
 }
@@ -138,59 +165,58 @@ export function VisitSection({ copy }: { copy: RestaurantCopy }) {
   const { links, contact } = restaurant;
 
   return (
-    <section className="section visit shell" id="visita" aria-labelledby="visit-title">
-      <SectionTitle id="visit-title" number="03" reveal>{copy.visitTitle}</SectionTitle>
-      <div className="visit-grid grid items-center">
-        <figure className="photo visit-photo" data-reveal>
-          <Photo
-            name="venue"
-            widths={[640, 1100]}
-            sizes="(max-width: 760px) calc(100vw - 40px), 48vw"
-            width={1100}
-            height={1150}
-            alt={copy.venueAlt}
-          />
-        </figure>
-        <div className="visit-info" data-reveal>
-          <p className="visit-intro">{copy.visitCopy}</p>
-          <dl className="visit-list">
-            <div>
-              <dt><Icon name="pin" /><span>{copy.address}</span></dt>
-              <dd>
-                <ExternalLink href={links.directions}>
-                  {contact.street}<br />{contact.city} <Icon name="external" />
-                </ExternalLink>
-              </dd>
-            </div>
-            <div>
-              <dt><Icon name="clock" /><span>{copy.hours}</span></dt>
-              <dd>{copy.daily}<br />{contact.hours}</dd>
-            </div>
-            <div>
-              <dt><Icon name="phone" /><span>{copy.contact}</span></dt>
-              <dd><a href={links.phone}>{contact.phone}</a></dd>
-            </div>
-          </dl>
-          <BookLink>{copy.book}</BookLink>
-          <p className="booking-note">{copy.bookNote}</p>
+    <section className="section" id="visita" aria-labelledby="visit-title">
+      <div className="visit shell">
+        <SectionTitle id="visit-title" number="03">{copy.visitTitle}</SectionTitle>
+        <div className="visit-grid grid items-center">
+          <figure className="photo visit-photo">
+            <Photo
+              name="contact-section"
+              widths={[720, 1280]}
+              sizes="(max-width: 600px) calc(100vw - 40px), (max-width: 760px) calc(100vw - 60px), (max-width: 1420px) 48vw, 660px"
+              width={1280}
+              height={825}
+              alt={copy.venueAlt}
+            />
+          </figure>
+          <div className="visit-info">
+            <p className="visit-intro">{copy.visitCopy}</p>
+            <dl className="visit-list">
+              <div>
+                <dt><Icon name="pin" /><span>{copy.address}</span></dt>
+                <dd>
+                  <ExternalLink href={links.directions}>
+                    {contact.street}<br />{contact.city} <Icon name="external" />
+                  </ExternalLink>
+                </dd>
+              </div>
+              <div>
+                <dt><Icon name="clock" /><span>{copy.hours}</span></dt>
+                <dd>{copy.daily}<br />{contact.hours}</dd>
+              </div>
+              <div>
+                <dt><Icon name="phone" /><span>{copy.contact}</span></dt>
+                <dd><a href={links.phone}>{contact.phone}</a></dd>
+              </div>
+            </dl>
+            <BookLink>{copy.book}</BookLink>
+            <p className="booking-note">{copy.bookNote}</p>
+          </div>
         </div>
-      </div>
-      <div className="map relative overflow-hidden">
-        <iframe
-          className="size-full border-0"
-          title={copy.mapTitle}
-          width={1320}
-          height={345}
-          loading="lazy"
-          referrerPolicy="strict-origin-when-cross-origin"
-          allowFullScreen
-          src={restaurant.links.map}
-        />
-        <ExternalLink className="button button-map" href={links.directions}>
-          <span>{copy.directions}</span><Icon name="external" />
-        </ExternalLink>
+        <VisitMap copy={copy} />
       </div>
     </section>
+  );
+}
+
+function GoogleMark() {
+  return (
+    <svg className="google-mark" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="#4285F4" d="M21.6 12.2c0-.7-.1-1.4-.2-2.1H12v4h5.4a4.6 4.6 0 0 1-2 3v2.6h3.2c1.9-1.8 3-4.4 3-7.5Z" />
+      <path fill="#34A853" d="M12 22c2.7 0 5-.9 6.6-2.3l-3.2-2.6c-.9.6-2.1.9-3.4.9-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22Z" />
+      <path fill="#FBBC05" d="M6.4 13.9a6 6 0 0 1 0-3.8V7.5H3.1a10 10 0 0 0 0 9l3.3-2.6Z" />
+      <path fill="#EA4335" d="M12 6c1.5 0 2.8.5 3.8 1.5l2.9-2.8A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.9 5.5l3.3 2.6A5.9 5.9 0 0 1 12 6Z" />
+    </svg>
   );
 }
 
@@ -200,23 +226,16 @@ export function ReviewsSection({ copy }: { copy: RestaurantCopy }) {
   const rating = reviews.rating == null ? null : numbers.format(reviews.rating);
 
   return (
-    <section className="section bg-band reviews" id="avaliacoes" aria-labelledby="reviews-title">
+    <section className="section reviews" id="avaliacoes" aria-labelledby="reviews-title">
       <div className="shell">
-        <SectionTitle id="reviews-title" number="04" reveal>{copy.reviewsTitle}</SectionTitle>
+        <SectionTitle id="reviews-title" number="04">{copy.reviewsTitle}</SectionTitle>
         <div className="review-feature relative">
           <figure className="photo review-photo">
-            <Photo
-              name="reviews"
-              widths={[800, 1440]}
-              sizes="(max-width: 600px) calc(100vw - 40px), 92vw"
-              width={1440}
-              height={580}
-              alt={copy.reviewsAlt}
-            />
+            <StorefrontPicture alt="" />
           </figure>
           {rating !== null && (
             <ExternalLink className="rating" href={restaurant.links.google} style={{ "--star-fill": `${reviews.rating * 20}%` } as CSSProperties}>
-              <span className="eyebrow">Google Maps <Icon name="external" /></span>
+              <span className="rating-platform"><GoogleMark /> Google Maps <Icon name="external" /></span>
               <span className="rating-line flex items-baseline gap-[9px]">
                 <strong aria-label={`${rating} ${copy.outOfFive}`}>{rating}</strong>
                 <span className="rating-stars" aria-hidden="true">★★★★★<span>★★★★★</span></span>
@@ -227,18 +246,19 @@ export function ReviewsSection({ copy }: { copy: RestaurantCopy }) {
         </div>
       </div>
 
-      <Carousel name="review" label={copy.reviewCarousel} copy={copy} speed={15} items={reviews.items.map((review) => ({
+      <Carousel label={copy.reviewCarousel} copy={copy} speed={15} items={reviews.items.map((review) => ({
         key: review.name,
         content: (
-          <article className="review-card flex h-full flex-col gap-2.5">
-            <div className="stars" aria-label={`${review.stars} ${copy.outOfFive}`}>
+          <article className="review-card flex h-full flex-col">
+            <header className="review-author flex items-center">
+              <span className="review-avatar" aria-hidden="true">{review.name[0]}</span>
+              <div className="grow"><strong>{review.name}</strong><span className="platform">{review.platform}</span></div>
+              {review.platform === "Google Maps" && <GoogleMark />}
+            </header>
+            <div className="stars" role="img" aria-label={`${review.stars} ${copy.outOfFive}`}>
               {"★".repeat(review.stars)}{"☆".repeat(5 - review.stars)}
             </div>
-            <blockquote className="grow" lang={review.lang}>{`“${review.quote}”`}</blockquote>
-            <div className="review-author flex items-center gap-2">
-              <span className="review-avatar" aria-hidden="true">{review.name[0]}</span>
-              <div><strong>{review.name}</strong><span className="platform">{review.platform}</span></div>
-            </div>
+            <blockquote lang={review.lang}>{review.quote}</blockquote>
           </article>
         ),
       }))} />
@@ -246,12 +266,14 @@ export function ReviewsSection({ copy }: { copy: RestaurantCopy }) {
   );
 }
 
-export function Footer({ copy, language, year, showReviews, inert }: {
+export function Footer({ copy, language, year, policies, showReviews, inert, menuPage = false }: {
   copy: RestaurantCopy;
   language: Language;
   year: number;
+  policies: RestaurantPolicies;
   showReviews: boolean;
   inert: boolean;
+  menuPage?: boolean;
 }) {
   const { links, contact } = restaurant;
   return (
@@ -259,15 +281,15 @@ export function Footer({ copy, language, year, showReviews, inert }: {
       <div className="shell">
         <div className="footer-grid grid">
           <div>
-            <Brand />
+            <Brand href={menuPage ? "/" : undefined} />
             <p className="tagline">{copy.tagline}</p>
           </div>
           <nav aria-label={copy.footerNav}>
             <h2 className="eyebrow">{copy.explore}</h2>
-            <a href="#espaco">{copy.spaceTitle}</a>
-            <a href="#carta">{copy.menuTitle}</a>
-            <a href="#visita">{copy.visitTitle}</a>
-            {showReviews && <a href="#avaliacoes">{copy.reviews}</a>}
+            <Link href={menuPage ? "/#espaco" : "#espaco"}>{copy.spaceTitle}</Link>
+            <Link href={restaurant.links.menu} prefetch={false}>{copy.menuTitle}</Link>
+            <Link href={menuPage ? "/#visita" : "#visita"}>{copy.visitTitle}</Link>
+            {showReviews && <Link href={menuPage ? "/#avaliacoes" : "#avaliacoes"}>{copy.reviews}</Link>}
           </nav>
           <div className="footer-contact">
             <h2 className="eyebrow">{copy.findUs}</h2>
@@ -279,9 +301,14 @@ export function Footer({ copy, language, year, showReviews, inert }: {
             </div>
           </div>
         </div>
-        <div className="footer-bottom flex justify-between gap-3">
-          <span>© {year} Sea Palace</span>
-          <Link href={`/credits?lang=${language}`}>{copy.credits}</Link>
+        <div className="footer-bottom">
+          <p>© {year} Sea Palace. {copy.rightsReserved} {copy.poweredBy} <ExternalLink href={links.intelis}>Intelis</ExternalLink></p>
+          <div className="footer-legal">
+            <ExternalLink href={links.complaints}>Livro de Reclamações</ExternalLink>
+            {policies.terms && <ExternalLink href={policies.terms}>{copy.terms}</ExternalLink>}
+            {policies.privacy && <ExternalLink href={policies.privacy}>{copy.privacy}</ExternalLink>}
+            <Link href={`/credits?lang=${language}`}>{copy.credits}</Link>
+          </div>
         </div>
       </div>
     </footer>

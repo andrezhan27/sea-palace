@@ -5,14 +5,13 @@ import type { RestaurantCopy } from "../lib/restaurant";
 import { Icon } from "./site-ui";
 
 type CarouselProps = {
-  name: "food" | "review";
   label: string;
   copy: RestaurantCopy;
   speed: number;
   items: { key: string; content: ReactNode }[];
 };
 
-export function Carousel({ name, label, copy, speed, items }: CarouselProps) {
+export function Carousel({ label, copy, speed, items }: CarouselProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [paused, setPaused] = useState(false);
@@ -34,8 +33,8 @@ export function Carousel({ name, label, copy, speed, items }: CarouselProps) {
     const options = { signal: listeners.signal };
 
     let period = 0;
+    let cardStep = 0;
     let position = 0;
-    let rendered = 0;
     let velocity = 0;
     let stepRemaining = 0;
     let lastFrame = 0;
@@ -46,14 +45,15 @@ export function Carousel({ name, label, copy, speed, items }: CarouselProps) {
 
     function setPosition(value: number) {
       position = reduced.matches || period <= 0
-        ? Math.max(0, Math.min(viewport.scrollWidth - viewport.clientWidth, value))
+        ? Math.max(0, Math.min(track.scrollWidth - viewport.clientWidth, value))
         : ((value % period) + period) % period;
-      viewport.scrollLeft = position;
-      rendered = viewport.scrollLeft;
+
+      // Keep fractional motion on the compositor without writing scroll offsets.
+      track.style.transform = position ? `translate3d(${-position}px, 0, 0)` : "";
     }
 
     function schedule() {
-      if (!frame && visible && !document.hidden && !reduced.matches) {
+      if (!frame && !drag && visible && !document.hidden && !reduced.matches) {
         frame = requestAnimationFrame(animate);
       }
     }
@@ -62,12 +62,6 @@ export function Carousel({ name, label, copy, speed, items }: CarouselProps) {
       frame = 0;
       const deltaTime = lastFrame ? Math.min(now - lastFrame, 34) : 16;
       lastFrame = now;
-
-      if (Math.abs(viewport.scrollLeft - rendered) >= 1) {
-        position = viewport.scrollLeft;
-        velocity = 0;
-        stepRemaining = 0;
-      }
 
       if (!drag) {
         const step = stepRemaining * Math.min(deltaTime / 94, 1);
@@ -80,14 +74,16 @@ export function Carousel({ name, label, copy, speed, items }: CarouselProps) {
         if (Math.abs(velocity) < 0.014) velocity = 0;
       }
 
-      if (!isPaused || drag || velocity || stepRemaining) schedule();
+      if (!isPaused || velocity || stepRemaining) schedule();
       else lastFrame = 0;
     }
 
     function measure() {
       if (!first || !firstClone) return;
-      period = firstClone.offsetLeft - first.offsetLeft;
-      setPosition(viewport.scrollLeft);
+      period = firstClone.getBoundingClientRect().left - first.getBoundingClientRect().left;
+      const gap = Number.parseFloat(getComputedStyle(track).columnGap) || 0;
+      cardStep = first.getBoundingClientRect().width + gap;
+      setPosition(position);
       schedule();
     }
 
@@ -98,11 +94,9 @@ export function Carousel({ name, label, copy, speed, items }: CarouselProps) {
     }
 
     function move(direction: number) {
-      if (!first) return;
-      const gap = Number.parseFloat(getComputedStyle(track).columnGap) || 0;
-      const distance = direction * (first.offsetWidth + gap);
+      const distance = direction * cardStep;
       if (reduced.matches) {
-        setPosition(viewport.scrollLeft + distance);
+        setPosition(position + distance);
       } else {
         stepRemaining += distance;
         velocity = 0;
@@ -125,14 +119,20 @@ export function Carousel({ name, label, copy, speed, items }: CarouselProps) {
       move(event.key === "ArrowRight" ? 1 : -1);
     }, options);
 
+    viewport.addEventListener("wheel", (event) => {
+      if (event.ctrlKey || Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
+      event.preventDefault();
+      stopMotion();
+      const unit = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 : 1;
+      setPosition(position + event.deltaX * unit);
+    }, { signal: listeners.signal, passive: false });
+
     viewport.addEventListener("pointerdown", (event) => {
       if (!event.isPrimary || event.button !== 0) return;
       drag = { id: event.pointerId, x: event.clientX, time: event.timeStamp };
       viewport.setPointerCapture(event.pointerId);
       viewport.classList.add("is-dragging");
       stopMotion();
-      position = viewport.scrollLeft;
-      schedule();
     }, options);
 
     viewport.addEventListener("pointermove", (event) => {
@@ -189,6 +189,7 @@ export function Carousel({ name, label, copy, speed, items }: CarouselProps) {
       resize.disconnect();
       cancelAnimationFrame(frame);
       viewport.classList.remove("is-dragging");
+      track.style.removeProperty("transform");
     };
   }, [loops, speed]);
 
@@ -198,9 +199,9 @@ export function Carousel({ name, label, copy, speed, items }: CarouselProps) {
   };
 
   return (
-    <div className={`carousel shell ${name === "review" ? "review-carousel" : ""}`}>
+    <div className="carousel review-carousel">
       <div ref={viewportRef} className="carousel-viewport" tabIndex={0} role="region" aria-label={label}>
-        <div ref={trackRef} className={`carousel-track flex items-stretch ${name}-track`}>
+        <div ref={trackRef} className="carousel-track flex items-stretch review-track">
           {items.map(({ key, content }) => <div className="carousel-item" key={key}>{content}</div>)}
           {loops && items.map(({ key, content }) => (
             <div className="carousel-item" key={`clone-${key}`} data-clone="" aria-hidden="true" inert>
@@ -210,7 +211,7 @@ export function Carousel({ name, label, copy, speed, items }: CarouselProps) {
         </div>
       </div>
       {loops && (
-        <div className="carousel-controls mt-[17px] flex justify-end gap-[7px]">
+        <div className="shell carousel-controls mt-[17px] flex justify-end gap-[7px]">
           <button type="button" className="round-button prev" onClick={() => controls.current?.move(-1)} aria-label={copy.previous}>
             <Icon name="right" />
           </button>

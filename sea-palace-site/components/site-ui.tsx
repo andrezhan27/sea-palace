@@ -2,7 +2,6 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { restaurant } from "../lib/restaurant";
 
 const iconPaths = {
-  down: <path d="M12 4v15m-6-6 6 6 6-6" />,
   right: <path d="M4 12h15m-6-6 6 6-6 6" />,
   external: <path d="M6 18 18 6M8 6h10v10" />,
   chevron: <path d="m6 9 6 6 6-6" />,
@@ -17,13 +16,9 @@ export function Icon({ name }: { name: keyof typeof iconPaths }) {
   return <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">{iconPaths[name]}</svg>;
 }
 
-export function Seal() {
-  return <span className="seal" lang="zh-Hant" aria-hidden="true">海上天</span>;
-}
-
-export function Brand() {
+export function Brand({ href = "#inicio" }: { href?: string }) {
   return (
-    <a className="brand inline-flex w-max items-center justify-self-start" href="#inicio" aria-label="Sea Palace">
+    <a className="brand inline-flex w-max items-center justify-self-start" href={href} aria-label="Sea Palace">
       <img className="brand-crest" src="/assets/brand/sea-palace-crest.webp" width={144} height={176} alt="" />
       <span className="brand-name">Sea Palace</span>
     </a>
@@ -42,14 +37,13 @@ export function ExternalLink(props: ComponentPropsWithoutRef<"a">) {
   return <a target="_blank" rel="noopener" {...props} />;
 }
 
-export function SectionTitle({ id, number, children, reveal = false }: {
+export function SectionTitle({ id, number, children }: {
   id: string;
   number: string;
   children: ReactNode;
-  reveal?: boolean;
 }) {
   return (
-    <h2 className="section-title flex items-center" id={id} tabIndex={-1} data-reveal={reveal ? "" : undefined}>
+    <h2 className="section-title flex items-center" id={id} tabIndex={-1}>
       <span className="section-number" aria-hidden="true">{number}</span>
       <span>{children}</span>
     </h2>
@@ -76,6 +70,7 @@ export function Photo({ name, widths, sizes, width, height, alt, draggable }: {
       alt={alt}
       draggable={draggable}
       loading="lazy"
+      fetchPriority="low"
       decoding="async"
     />
   );

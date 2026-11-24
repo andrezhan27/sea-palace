@@ -12,14 +12,19 @@ Open http://localhost:3000. Run `npm run build` to type-check and generate the s
 
 ## GitHub and Vercel
 
-Commit and push from the repository root, one level above `sea-palace-site`. Import the GitHub repository in Vercel, set Root Directory to `sea-palace-site`, and use `main` as the production branch. The app's `vercel.json` runs `npm ci` and `npm run build`, serves `out/`, and enables extensionless URLs such as `/credits`. The site requires no environment variables. GitHub Actions verifies the production build on pushes and pull requests.
+Import the GitHub repository in Vercel and set Root Directory to `sea-palace-site`. Use `main` as the production branch and Node.js 22.x. The app's `vercel.json` uses the Other framework preset, runs `npm ci` and `npm run build`, serves `out/`, and enables extensionless URLs such as `/menu` and `/credits`. GitHub Actions verifies the production build on pushes and pull requests.
+
+To include Terms and Conditions and Privacy Policy in the footer, add both variables from [`.env.example`](.env.example) in Vercel under **Settings → Environment Variables**. Select Production and any Preview environments that should show the links. For a local build, copy the example to `.env.local` and fill in the values.
+
+Use the Supabase project URL and its publishable key. The Supabase `anon` role needs read access to the `terms_and_conditions_url` and `privacy_policy_url` fields on the `restaurants` row with `id = seapalace`. Store absolute HTTPS URLs for the documents. The build adds each available link to the home and menu footers. Redeploy after updating either the environment variables or the URLs in Supabase. Builds with both variables unset omit the policy links.
 
 ## Editing
 
 - `lib/restaurant.ts` contains Portuguese and English copy, contact details, destinations, dishes, prices, and reviews. Set `reviews.enabled` to `false` to remove the reviews and their navigation links.
-- `app/page.tsx` and `app/credits/page.tsx` are the App Router routes. The landing page sections and carousel live in `components/`.
+- The home, menu and credits routes live in `app/`. The landing page sections and carousel live in `components/`.
 - The palette, typography, and spacing are defined in `app/globals.css`. Photography and fonts live in `public/assets/`. The provisional seal uses 海上天, the name displayed by the restaurant’s Google Maps owner profile.
-- Menu carousel photos live in `public/assets/menu/`. Each dish has 480 px and 800 px WebP variants. Order, captions, alt text and credits are in `lib/menu-photos.ts`.
+- Menu categories, dish names and image IDs are in `lib/menu-categories.ts`. Dish thumbnails and the downloadable menu PDF live in `public/assets/menu/`.
+- The space gallery uses the 480 px and 960 px WebP variants in `public/assets/space/`. Gallery order and bilingual alt text are in `lib/space-photos.ts`.
 
 ## Content sources
 
