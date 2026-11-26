@@ -37,15 +37,13 @@ export function ExternalLink(props: ComponentPropsWithoutRef<"a">) {
   return <a target="_blank" rel="noopener" {...props} />;
 }
 
-export function SectionTitle({ id, number, children }: {
+export function SectionTitle({ id, children }: {
   id: string;
-  number: string;
   children: ReactNode;
 }) {
   return (
-    <h2 className="section-title flex items-center" id={id} tabIndex={-1}>
-      <span className="section-number" aria-hidden="true">{number}</span>
-      <span>{children}</span>
+    <h2 className="section-title" id={id} tabIndex={-1}>
+      {children}
     </h2>
   );
 }

@@ -12,6 +12,7 @@ function StorefrontPicture({ className, alt, isHero = false }: {
   alt: string;
   isHero?: boolean;
 }) {
+  const desktop = isHero ? "hero-dusk" : "hero-desktop";
   const sizes = isHero ? "100vw" : "(max-width: 600px) calc(100vw - 40px), (max-width: 1050px) calc(100vw - 60px), (max-width: 1420px) calc(100vw - 100px), 1320px";
 
   return (
@@ -30,12 +31,12 @@ function StorefrontPicture({ className, alt, isHero = false }: {
       />
       <source
         type="image/avif"
-        srcSet="/assets/hero-desktop-960.avif 960w, /assets/hero-desktop-1672.avif 1672w"
+        srcSet={`/assets/${desktop}-960.avif 960w, /assets/${desktop}-1672.avif 1672w`}
         sizes={sizes}
       />
       <img
-        src="/assets/hero-desktop-1672.webp"
-        srcSet="/assets/hero-desktop-960.webp 960w, /assets/hero-desktop-1672.webp 1672w"
+        src={`/assets/${desktop}-1672.webp`}
+        srcSet={`/assets/${desktop}-960.webp 960w, /assets/${desktop}-1672.webp 1672w`}
         sizes={sizes}
         width={1672}
         height={941}
@@ -56,13 +57,15 @@ export function Hero({ copy }: { copy: RestaurantCopy }) {
       <div className="hero-content">
         <p className="hero-location eyebrow">{copy.heroLocation}</p>
         <h1 id="hero-title" tabIndex={-1}>
-          <img src="/assets/brand/sea-palace-white.webp" width={2172} height={724} alt="Sea Palace" />
+          Sea Palace <span className="hero-chinese" lang="zh-Hant">海上天</span>
         </h1>
         <p className="hero-cuisine">{copy.heroCuisine}</p>
       </div>
       <div className="hero-actions flex flex-wrap items-center">
         <BookLink>{copy.book}</BookLink>
-        <Link className="hero-menu-link" href={restaurant.links.menu} prefetch={false}>{copy.viewMenu}</Link>
+        <Link className="button button-outline hero-menu-link" href={restaurant.links.menu} prefetch={false}>
+          {copy.viewMenu}<Icon name="right" />
+        </Link>
       </div>
     </section>
   );
@@ -75,7 +78,7 @@ export function SpaceSection({ copy, language }: { copy: RestaurantCopy; languag
   return (
     <section className="section" id="espaco" aria-labelledby="space-title">
       <div className="shell section-head grid">
-        <SectionTitle id="space-title" number="01">{copy.spaceTitle}</SectionTitle>
+        <SectionTitle id="space-title">{copy.spaceTitle}</SectionTitle>
         <p>{copy.spaceCopy}</p>
       </div>
       <div className="shell space-mosaic">
@@ -105,7 +108,7 @@ export function MenuSection({ copy, language }: { copy: RestaurantCopy; language
   return (
     <section className="section" id="carta" aria-labelledby="menu-title">
       <div className="shell section-head grid">
-        <SectionTitle id="menu-title" number="02">{copy.menuTitle}</SectionTitle>
+        <SectionTitle id="menu-title">{copy.menuTitle}</SectionTitle>
         <div>
           <p>{copy.menuCopy}</p>
           <div className="text-links flex flex-wrap">
@@ -167,7 +170,7 @@ export function VisitSection({ copy }: { copy: RestaurantCopy }) {
   return (
     <section className="section" id="visita" aria-labelledby="visit-title">
       <div className="visit shell">
-        <SectionTitle id="visit-title" number="03">{copy.visitTitle}</SectionTitle>
+        <SectionTitle id="visit-title">{copy.visitTitle}</SectionTitle>
         <div className="visit-grid grid items-center">
           <figure className="photo visit-photo">
             <Photo
@@ -228,7 +231,7 @@ export function ReviewsSection({ copy }: { copy: RestaurantCopy }) {
   return (
     <section className="section reviews" id="avaliacoes" aria-labelledby="reviews-title">
       <div className="shell">
-        <SectionTitle id="reviews-title" number="04">{copy.reviewsTitle}</SectionTitle>
+        <SectionTitle id="reviews-title">{copy.reviewsTitle}</SectionTitle>
         <div className="review-feature relative">
           <figure className="photo review-photo">
             <StorefrontPicture alt="" />

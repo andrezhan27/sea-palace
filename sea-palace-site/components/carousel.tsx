@@ -212,13 +212,13 @@ export function Carousel({ label, copy, speed, items }: CarouselProps) {
       </div>
       {loops && (
         <div className="shell carousel-controls mt-[17px] flex justify-end gap-[7px]">
-          <button type="button" className="round-button prev" onClick={() => controls.current?.move(-1)} aria-label={copy.previous}>
+          <button type="button" className="icon-button prev" onClick={() => controls.current?.move(-1)} aria-label={copy.previous}>
             <Icon name="right" />
           </button>
-          <button type="button" className="round-button" data-pause onClick={pausePlayback} aria-label={paused ? copy.play : copy.pause}>
+          <button type="button" className="icon-button" data-pause onClick={pausePlayback} aria-label={paused ? copy.play : copy.pause}>
             <Icon name={paused ? "play" : "pause"} />
           </button>
-          <button type="button" className="round-button" onClick={() => controls.current?.move(1)} aria-label={copy.next}>
+          <button type="button" className="icon-button" onClick={() => controls.current?.move(1)} aria-label={copy.next}>
             <Icon name="right" />
           </button>
         </div>

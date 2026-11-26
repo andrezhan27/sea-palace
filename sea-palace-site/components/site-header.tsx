@@ -6,11 +6,11 @@ import { isLanguage, restaurant, type Language, type RestaurantCopy } from "../l
 import { BookLink, Brand, Icon } from "./site-ui";
 
 export const navigation = [
-  { id: "inicio", number: "00", text: "home" },
-  { id: "espaco", number: "01", text: "space" },
-  { id: "carta", number: "02", text: "menu" },
-  { id: "visita", number: "03", text: "visit" },
-  { id: "avaliacoes", number: "04", text: "reviews" },
+  { id: "inicio", text: "home" },
+  { id: "espaco", text: "space" },
+  { id: "carta", text: "menu" },
+  { id: "visita", text: "visit" },
+  { id: "avaliacoes", text: "reviews" },
 ] as const;
 
 export type SectionId = (typeof navigation)[number]["id"];
@@ -162,9 +162,9 @@ export function SiteHeader({
       <div className="mobile-overlay" aria-hidden="true" onClick={() => close()} />
       <div ref={panel} className="mobile-menu" id="mobile-menu" inert={!menuOpen}>
         <nav aria-label={copy.mainNav}>
-          {links.map(({ id, text, number }) => (
+          {links.map(({ id, text }) => (
             <Link key={id} href={href(id)} prefetch={id === "carta" ? false : undefined} aria-current={current(id)}>
-              <span aria-hidden="true">{number}</span><span>{copy[text]}</span>
+              {copy[text]}
             </Link>
           ))}
         </nav>

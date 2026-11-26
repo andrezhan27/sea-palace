@@ -2,6 +2,10 @@ import { menuCategories, type MenuDish } from "../lib/menu-categories";
 import type { Language } from "../lib/restaurant";
 import { Icon } from "./site-ui";
 
+export function menuDishImage(image: MenuDish[0]) {
+  return `/assets/menu/dishes/${image}.webp`;
+}
+
 export function MenuCategoryPicker({ label, language, value, onChange }: {
   label: string;
   language: Language;
@@ -28,7 +32,7 @@ export function MenuDishCard({ dish: [image, pt, en], language, eager = false }:
 }) {
   return (
     <article className="menu-dish">
-      <img src={`/assets/menu/dishes/${image}.webp`} alt="" decoding="async" loading={eager ? "eager" : "lazy"} />
+      <img src={menuDishImage(image)} alt="" decoding="async" loading={eager ? "eager" : "lazy"} />
       <h3>{language === "pt" ? pt : en}</h3>
     </article>
   );
