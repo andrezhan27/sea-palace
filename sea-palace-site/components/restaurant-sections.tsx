@@ -12,32 +12,16 @@ function StorefrontPicture({ className, alt, isHero = false }: {
   alt: string;
   isHero?: boolean;
 }) {
-  const desktop = isHero ? "hero-dusk" : "hero-desktop";
-  const sizes = isHero ? "100vw" : "(max-width: 600px) calc(100vw - 40px), (max-width: 1050px) calc(100vw - 60px), (max-width: 1420px) calc(100vw - 100px), 1320px";
-
   return (
     <picture className={className}>
       <source
         media="(max-width: 600px)"
-        type="image/avif"
-        srcSet="/assets/hero-mobile-480.avif 480w, /assets/hero-mobile-720.avif 720w, /assets/hero-mobile-941.avif 941w"
-        sizes={sizes}
-      />
-      <source
-        media="(max-width: 600px)"
-        type="image/webp"
-        srcSet="/assets/hero-mobile-480.webp 480w, /assets/hero-mobile-720.webp 720w, /assets/hero-mobile-941.webp 941w"
-        sizes={sizes}
-      />
-      <source
-        type="image/avif"
-        srcSet={`/assets/${desktop}-960.avif 960w, /assets/${desktop}-1672.avif 1672w`}
-        sizes={sizes}
+        srcSet="/assets/hero-mobile.webp"
+        width={941}
+        height={1672}
       />
       <img
-        src={`/assets/${desktop}-1672.webp`}
-        srcSet={`/assets/${desktop}-960.webp 960w, /assets/${desktop}-1672.webp 1672w`}
-        sizes={sizes}
+        src="/assets/hero-desktop.webp"
         width={1672}
         height={941}
         alt={alt}
@@ -72,7 +56,6 @@ export function Hero({ copy }: { copy: RestaurantCopy }) {
 }
 
 const smallSpacePhotos = new Set(["space-2", "space-5", "space-8", "space-10"]);
-const mobileSpacePhotoSize = "(max-width: 600px) calc((100vw - 48px) / 2), (max-width: 760px) calc((100vw - 68px) / 2)";
 
 export function SpaceSection({ copy, language }: { copy: RestaurantCopy; language: Language }) {
   return (
@@ -84,14 +67,11 @@ export function SpaceSection({ copy, language }: { copy: RestaurantCopy; languag
       <div className="shell space-mosaic">
         {spacePhotos.map((photo) => {
           const small = smallSpacePhotos.has(photo.name);
-          const desktopSize = small ? "(max-width: 1420px) 13vw, 177px" : "(max-width: 1420px) 27vw, 368px";
 
           return (
             <figure className={small ? "photo space-photo" : "photo space-photo space-photo-large"} key={photo.name}>
               <Photo
                 name={`space/${photo.name}`}
-                widths={[480, 960]}
-                sizes={`${mobileSpacePhotoSize}, ${desktopSize}`}
                 width={960}
                 height={720}
                 alt={photo[language]}
@@ -175,8 +155,6 @@ export function VisitSection({ copy }: { copy: RestaurantCopy }) {
           <figure className="photo visit-photo">
             <Photo
               name="contact-section"
-              widths={[720, 1280]}
-              sizes="(max-width: 600px) calc(100vw - 40px), (max-width: 760px) calc(100vw - 60px), (max-width: 1420px) 48vw, 660px"
               width={1280}
               height={825}
               alt={copy.venueAlt}

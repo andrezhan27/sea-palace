@@ -24,7 +24,7 @@ Use the Supabase project URL and its publishable key. The Supabase `anon` role n
 - The home, menu and credits routes live in `app/`. The landing page sections and carousel live in `components/`.
 - The palette, typography, and spacing are defined in `app/globals.css`. Photography and fonts live in `public/assets/`. The provisional seal uses 海上天, the name displayed by the restaurant’s Google Maps owner profile.
 - Menu categories, dish names and image IDs are in `lib/menu-categories.ts`. Dish thumbnails and the downloadable menu PDF live in `public/assets/menu/`.
-- The space gallery uses the 480 px and 960 px WebP variants in `public/assets/space/`. Gallery order and bilingual alt text are in `lib/space-photos.ts`.
+- The space gallery uses one WebP per photo in `public/assets/space/`. Gallery order and bilingual alt text are in `lib/space-photos.ts`.
 
 ## Content sources
 

@@ -48,21 +48,16 @@ export function SectionTitle({ id, children }: {
   );
 }
 
-export function Photo({ name, widths, sizes, width, height, alt, draggable }: {
+export function Photo({ name, width, height, alt, draggable }: {
   name: string;
-  widths: readonly number[];
-  sizes: string;
   width: number;
   height: number;
   alt: string;
   draggable?: boolean;
 }) {
-  // Keep the pre-cropped WebP variants so the static export can serve them directly.
   return (
     <img
-      src={`/assets/${name}-${widths.at(-1)}.webp`}
-      srcSet={widths.map((variant) => `/assets/${name}-${variant}.webp ${variant}w`).join(", ")}
-      sizes={sizes}
+      src={`/assets/${name}.webp`}
       width={width}
       height={height}
       alt={alt}
